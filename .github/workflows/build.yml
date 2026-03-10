@@ -33,6 +33,8 @@ jobs:
           --hidden-import=PyQt6.QtCore ^
           --hidden-import=PyQt6.QtGui ^
           --hidden-import=PyQt6.QtWidgets ^
+          --collect-all PyQt6 ^
+          --collect-all PyQt6-Qt6 ^
           retirement_app.py
 
     - name: Upload artifact
