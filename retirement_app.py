@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-退休进度条 - 轻量版 (pystray + tkinter)
+退休进度条 - 轻量版 (pystray + CustomTkinter)
 """
 
 import os
@@ -10,15 +10,14 @@ import json
 import threading
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
-import tkinter as tk
-from tkinter import messagebox, simpledialog
+import customtkinter as ctk
 
 # 尝试导入 pystray，如果失败给出提示
 try:
     import pystray
     from PIL import Image, ImageDraw
 except ImportError:
-    print("请先安装依赖: pip install pystray pillow python-dateutil")
+    print("请先安装依赖: pip install pystray pillow python-dateutil customtkinter")
     sys.exit(1)
 
 # 配置文件路径
@@ -137,81 +136,193 @@ def format_tooltip(config):
 
 
 def show_settings(config, icon=None):
-    """显示设置对话框 (tkinter)"""
-    root = tk.Tk()
+    """显示设置对话框 (CustomTkinter - Win11/macOS风格)"""
+    # 设置外观
+    ctk.set_appearance_mode('system')  # 跟随系统主题
+    ctk.set_default_color_theme('blue')
+
+    root = ctk.CTk()
     root.title('退休进度条 - 设置')
-    root.geometry('350x300')
+    root.geometry('400x420')
     root.resizable(False, False)
 
     # 居中窗口
     root.update_idletasks()
-    x = (root.winfo_screenwidth() // 2) - (350 // 2)
-    y = (root.winfo_screenheight() // 2) - (300 // 2)
+    x = (root.winfo_screenwidth() // 2) - (400 // 2)
+    y = (root.winfo_screenheight() // 2) - (420 // 2)
     root.geometry(f'+{x}+{y}')
 
+    # 标题
+    title_label = ctk.CTkLabel(
+        root,
+        text='🏖️ 退休进度条',
+        font=ctk.CTkFont(size=20, weight='bold')
+    )
+    title_label.pack(pady=(20, 10))
+
+    # 副标题
+    subtitle = ctk.CTkLabel(
+        root,
+        text='配置您的退休计划',
+        font=ctk.CTkFont(size=12),
+        text_color='gray'
+    )
+    subtitle.pack(pady=(0, 20))
+
+    # 表单区域
+    form_frame = ctk.CTkFrame(root, fg_color='transparent')
+    form_frame.pack(fill='x', padx=30)
+
     # 目标金额
-    tk.Label(root, text='目标退休金额（元）:').pack(anchor='w', padx=20, pady=(10, 0))
-    target_var = tk.StringVar(value=str(config.get('target_amount', 5000000)))
-    tk.Entry(root, textvariable=target_var, width=30).pack(anchor='w', padx=20)
+    ctk.CTkLabel(form_frame, text='目标退休金额', font=ctk.CTkFont(size=12)).pack(anchor='w', pady=(10, 5))
+    target_entry = ctk.CTkEntry(form_frame, placeholder_text='例如：5000000', height=35)
+    target_entry.pack(fill='x')
+    target_entry.insert(0, str(config.get('target_amount', 5000000)))
 
     # 当前金额
-    tk.Label(root, text='当前已有储蓄（元）:').pack(anchor='w', padx=20, pady=(10, 0))
-    current_var = tk.StringVar(value=str(config.get('current_amount', 100000)))
-    tk.Entry(root, textvariable=current_var, width=30).pack(anchor='w', padx=20)
+    ctk.CTkLabel(form_frame, text='当前已有储蓄', font=ctk.CTkFont(size=12)).pack(anchor='w', pady=(15, 5))
+    current_entry = ctk.CTkEntry(form_frame, placeholder_text='例如：100000', height=35)
+    current_entry.pack(fill='x')
+    current_entry.insert(0, str(config.get('current_amount', 100000)))
 
     # 月储蓄
-    tk.Label(root, text='本月预计储蓄（元）:').pack(anchor='w', padx=20, pady=(10, 0))
-    monthly_var = tk.StringVar(value=str(config.get('monthly_saving', 5000)))
-    tk.Entry(root, textvariable=monthly_var, width=30).pack(anchor='w', padx=20)
+    ctk.CTkLabel(form_frame, text='每月预计储蓄', font=ctk.CTkFont(size=12)).pack(anchor='w', pady=(15, 5))
+    monthly_entry = ctk.CTkEntry(form_frame, placeholder_text='例如：5000', height=35)
+    monthly_entry.pack(fill='x')
+    monthly_entry.insert(0, str(config.get('monthly_saving', 5000)))
 
     # 收益率
-    tk.Label(root, text='预期年化收益率（%）:').pack(anchor='w', padx=20, pady=(10, 0))
-    return_var = tk.StringVar(value=str(config.get('annual_return', 3.0)))
-    tk.Entry(root, textvariable=return_var, width=30).pack(anchor='w', padx=20)
+    ctk.CTkLabel(form_frame, text='预期年化收益率 (%)', font=ctk.CTkFont(size=12)).pack(anchor='w', pady=(15, 5))
+    return_entry = ctk.CTkEntry(form_frame, placeholder_text='例如：3.0', height=35)
+    return_entry.pack(fill='x')
+    return_entry.insert(0, str(config.get('annual_return', 3.0)))
+
+    # 错误提示标签
+    error_label = ctk.CTkLabel(root, text='', font=ctk.CTkFont(size=11), text_color='#FF6B6B')
+    error_label.pack(pady=(10, 0))
 
     def on_save():
         try:
-            config['target_amount'] = float(target_var.get())
-            config['current_amount'] = float(current_var.get())
-            config['monthly_saving'] = float(monthly_var.get())
-            config['annual_return'] = float(return_var.get())
+            config['target_amount'] = float(target_entry.get())
+            config['current_amount'] = float(current_entry.get())
+            config['monthly_saving'] = float(monthly_entry.get())
+            config['annual_return'] = float(return_entry.get())
             save_config(config)
             if icon:
                 icon.title = format_tooltip(config)
             root.destroy()
         except ValueError:
-            messagebox.showerror('错误', '请输入有效的数字！')
+            error_label.configure(text='⚠️ 请输入有效的数字！')
 
-    # 按钮
-    btn_frame = tk.Frame(root)
-    btn_frame.pack(pady=15)
-    tk.Button(btn_frame, text='保存', command=on_save, width=10).pack(side='left', padx=5)
-    tk.Button(btn_frame, text='取消', command=root.destroy, width=10).pack(side='left', padx=5)
+    def on_cancel():
+        root.destroy()
+
+    # 按钮区域
+    btn_frame = ctk.CTkFrame(root, fg_color='transparent')
+    btn_frame.pack(pady=20)
+
+    ctk.CTkButton(
+        btn_frame,
+        text='取消',
+        command=on_cancel,
+        width=100,
+        height=35,
+        fg_color='transparent',
+        border_width=1,
+        text_color=('gray10', 'gray90')
+    ).pack(side='left', padx=5)
+
+    ctk.CTkButton(
+        btn_frame,
+        text='保存设置',
+        command=on_save,
+        width=100,
+        height=35,
+        font=ctk.CTkFont(weight='bold')
+    ).pack(side='left', padx=5)
 
     root.mainloop()
 
 
 def show_monthly_dialog(config, icon):
-    """显示月度更新对话框"""
-    root = tk.Tk()
-    root.withdraw()  # 隐藏主窗口
+    """显示月度更新对话框 (CustomTkinter)"""
+    ctk.set_appearance_mode('system')
+    ctk.set_default_color_theme('blue')
 
-    result = simpledialog.askfloat(
-        '更新月储蓄金额',
-        f'今天是 {datetime.now().strftime("%Y年%m月%d日")}\n'
-        f'请输入本月预计储蓄金额（元）:',
-        initialvalue=config.get('monthly_saving', 5000),
-        minvalue=0,
-        maxvalue=999999999
-    )
+    root = ctk.CTk()
+    root.title('更新月储蓄金额')
+    root.geometry('350x220')
+    root.resizable(False, False)
 
-    if result is not None:
-        config['monthly_saving'] = result
-        config['last_monthly_check'] = datetime.now().strftime('%Y-%m')
-        save_config(config)
-        icon.title = format_tooltip(config)
+    # 居中窗口
+    root.update_idletasks()
+    x = (root.winfo_screenwidth() // 2) - (350 // 2)
+    y = (root.winfo_screenheight() // 2) - (220 // 2)
+    root.geometry(f'+{x}+{y}')
 
-    root.destroy()
+    # 标题
+    ctk.CTkLabel(
+        root,
+        text='📅 月度储蓄更新',
+        font=ctk.CTkFont(size=16, weight='bold')
+    ).pack(pady=(20, 10))
+
+    # 日期显示
+    today_str = datetime.now().strftime('%Y年%m月%d日')
+    ctk.CTkLabel(
+        root,
+        text=f'今天是 {today_str}',
+        font=ctk.CTkFont(size=12),
+        text_color='gray'
+    ).pack(pady=(0, 15))
+
+    # 输入框
+    ctk.CTkLabel(root, text='本月预计储蓄金额（元）', font=ctk.CTkFont(size=12)).pack(anchor='w', padx=30)
+    entry = ctk.CTkEntry(root, placeholder_text='例如：5000', height=35)
+    entry.pack(fill='x', padx=30, pady=(5, 15))
+    entry.insert(0, str(config.get('monthly_saving', 5000)))
+
+    def on_confirm():
+        try:
+            result = float(entry.get())
+            if result < 0:
+                return
+            config['monthly_saving'] = result
+            config['last_monthly_check'] = datetime.now().strftime('%Y-%m')
+            save_config(config)
+            icon.title = format_tooltip(config)
+            root.destroy()
+        except ValueError:
+            pass
+
+    def on_skip():
+        root.destroy()
+
+    # 按钮
+    btn_frame = ctk.CTkFrame(root, fg_color='transparent')
+    btn_frame.pack(pady=10)
+
+    ctk.CTkButton(
+        btn_frame,
+        text='跳过',
+        command=on_skip,
+        width=80,
+        height=32,
+        fg_color='transparent',
+        border_width=1,
+        text_color=('gray10', 'gray90')
+    ).pack(side='left', padx=5)
+
+    ctk.CTkButton(
+        btn_frame,
+        text='确认',
+        command=on_confirm,
+        width=80,
+        height=32,
+        font=ctk.CTkFont(weight='bold')
+    ).pack(side='left', padx=5)
+
+    root.mainloop()
 
 
 def check_monthly_reminder(config, icon):
