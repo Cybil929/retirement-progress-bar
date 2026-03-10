@@ -143,13 +143,13 @@ def show_settings(config, icon=None):
 
     root = ctk.CTk()
     root.title('退休进度条 - 设置')
-    root.geometry('420x480')
+    root.geometry('420x520')
     root.resizable(False, False)
 
     # 居中窗口
     root.update_idletasks()
     x = (root.winfo_screenwidth() // 2) - (420 // 2)
-    y = (root.winfo_screenheight() // 2) - (480 // 2)
+    y = (root.winfo_screenheight() // 2) - (520 // 2)
     root.geometry(f'+{x}+{y}')
 
     # 标题
