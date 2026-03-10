@@ -140,13 +140,13 @@ def show_settings(config, icon=None):
     """显示设置对话框 (tkinter)"""
     root = tk.Tk()
     root.title('退休进度条 - 设置')
-    root.geometry('350x250')
+    root.geometry('350x300')
     root.resizable(False, False)
 
     # 居中窗口
     root.update_idletasks()
     x = (root.winfo_screenwidth() // 2) - (350 // 2)
-    y = (root.winfo_screenheight() // 2) - (250 // 2)
+    y = (root.winfo_screenheight() // 2) - (300 // 2)
     root.geometry(f'+{x}+{y}')
 
     # 目标金额
