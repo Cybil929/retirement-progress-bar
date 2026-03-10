@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-退休进度条 - 轻量版 (pystray + CustomTkinter)
+退休进度条 - 轻量版 (pystray + tkinter)
 """
 
 import os
@@ -17,7 +17,7 @@ try:
     import pystray
     from PIL import Image, ImageDraw
 except ImportError:
-    print("请先安装依赖: pip install pystray pillow python-dateutil customtkinter")
+    print("请先安装依赖: pip install pystray pillow python-dateutil")
     sys.exit(1)
 
 # 配置文件路径
@@ -143,63 +143,63 @@ def show_settings(config, icon=None):
 
     root = ctk.CTk()
     root.title('退休进度条 - 设置')
-    root.geometry('400x420')
+    root.geometry('420x480')
     root.resizable(False, False)
 
     # 居中窗口
     root.update_idletasks()
-    x = (root.winfo_screenwidth() // 2) - (400 // 2)
-    y = (root.winfo_screenheight() // 2) - (420 // 2)
+    x = (root.winfo_screenwidth() // 2) - (420 // 2)
+    y = (root.winfo_screenheight() // 2) - (480 // 2)
     root.geometry(f'+{x}+{y}')
 
     # 标题
     title_label = ctk.CTkLabel(
         root,
-        text='🏖️ 退休进度条',
-        font=ctk.CTkFont(size=20, weight='bold')
+        text='退休进度条',
+        font=('Microsoft YaHei', 22, 'bold')
     )
-    title_label.pack(pady=(20, 10))
+    title_label.pack(pady=(25, 8))
 
     # 副标题
     subtitle = ctk.CTkLabel(
         root,
         text='配置您的退休计划',
-        font=ctk.CTkFont(size=12),
+        font=('Microsoft YaHei', 12),
         text_color='gray'
     )
-    subtitle.pack(pady=(0, 20))
+    subtitle.pack(pady=(0, 25))
 
     # 表单区域
     form_frame = ctk.CTkFrame(root, fg_color='transparent')
-    form_frame.pack(fill='x', padx=30)
+    form_frame.pack(fill='x', padx=35)
 
     # 目标金额
-    ctk.CTkLabel(form_frame, text='目标退休金额', font=ctk.CTkFont(size=12)).pack(anchor='w', pady=(10, 5))
-    target_entry = ctk.CTkEntry(form_frame, placeholder_text='例如：5000000', height=35)
+    ctk.CTkLabel(form_frame, text='目标退休金额', font=('Microsoft YaHei', 11)).pack(anchor='w', pady=(12, 5))
+    target_entry = ctk.CTkEntry(form_frame, placeholder_text='例如：5000000', height=38, font=('Microsoft YaHei', 11))
     target_entry.pack(fill='x')
     target_entry.insert(0, str(config.get('target_amount', 5000000)))
 
     # 当前金额
-    ctk.CTkLabel(form_frame, text='当前已有储蓄', font=ctk.CTkFont(size=12)).pack(anchor='w', pady=(15, 5))
-    current_entry = ctk.CTkEntry(form_frame, placeholder_text='例如：100000', height=35)
+    ctk.CTkLabel(form_frame, text='当前已有储蓄', font=('Microsoft YaHei', 11)).pack(anchor='w', pady=(18, 5))
+    current_entry = ctk.CTkEntry(form_frame, placeholder_text='例如：100000', height=38, font=('Microsoft YaHei', 11))
     current_entry.pack(fill='x')
     current_entry.insert(0, str(config.get('current_amount', 100000)))
 
     # 月储蓄
-    ctk.CTkLabel(form_frame, text='每月预计储蓄', font=ctk.CTkFont(size=12)).pack(anchor='w', pady=(15, 5))
-    monthly_entry = ctk.CTkEntry(form_frame, placeholder_text='例如：5000', height=35)
+    ctk.CTkLabel(form_frame, text='每月预计储蓄', font=('Microsoft YaHei', 11)).pack(anchor='w', pady=(18, 5))
+    monthly_entry = ctk.CTkEntry(form_frame, placeholder_text='例如：5000', height=38, font=('Microsoft YaHei', 11))
     monthly_entry.pack(fill='x')
     monthly_entry.insert(0, str(config.get('monthly_saving', 5000)))
 
     # 收益率
-    ctk.CTkLabel(form_frame, text='预期年化收益率 (%)', font=ctk.CTkFont(size=12)).pack(anchor='w', pady=(15, 5))
-    return_entry = ctk.CTkEntry(form_frame, placeholder_text='例如：3.0', height=35)
+    ctk.CTkLabel(form_frame, text='预期年化收益率 (%)', font=('Microsoft YaHei', 11)).pack(anchor='w', pady=(18, 5))
+    return_entry = ctk.CTkEntry(form_frame, placeholder_text='例如：3.0', height=38, font=('Microsoft YaHei', 11))
     return_entry.pack(fill='x')
     return_entry.insert(0, str(config.get('annual_return', 3.0)))
 
     # 错误提示标签
-    error_label = ctk.CTkLabel(root, text='', font=ctk.CTkFont(size=11), text_color='#FF6B6B')
-    error_label.pack(pady=(10, 0))
+    error_label = ctk.CTkLabel(root, text='', font=('Microsoft YaHei', 10), text_color='#FF6B6B')
+    error_label.pack(pady=(15, 0))
 
     def on_save():
         try:
@@ -219,27 +219,28 @@ def show_settings(config, icon=None):
 
     # 按钮区域
     btn_frame = ctk.CTkFrame(root, fg_color='transparent')
-    btn_frame.pack(pady=20)
+    btn_frame.pack(pady=25)
 
     ctk.CTkButton(
         btn_frame,
         text='取消',
         command=on_cancel,
-        width=100,
-        height=35,
+        width=110,
+        height=38,
         fg_color='transparent',
         border_width=1,
-        text_color=('gray10', 'gray90')
-    ).pack(side='left', padx=5)
+        text_color=('gray10', 'gray90'),
+        font=('Microsoft YaHei', 11)
+    ).pack(side='left', padx=8)
 
     ctk.CTkButton(
         btn_frame,
         text='保存设置',
         command=on_save,
-        width=100,
-        height=35,
-        font=ctk.CTkFont(weight='bold')
-    ).pack(side='left', padx=5)
+        width=110,
+        height=38,
+        font=('Microsoft YaHei', 11, 'bold')
+    ).pack(side='left', padx=8)
 
     root.mainloop()
 
