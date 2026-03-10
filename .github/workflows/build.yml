@@ -5,7 +5,7 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch:  # 允许手动触发
+  workflow_dispatch:
 
 jobs:
   build:
@@ -26,7 +26,13 @@ jobs:
 
     - name: Build EXE with PyInstaller
       run: |
-        pyinstaller --onefile --windowed --name "退休进度条" --icon=NONE --hidden-import=pkgutil retirement_app.py
+        pyinstaller --onefile --windowed --name "退休进度条" --icon=NONE ^
+          --hidden-import=pkgutil ^
+          --hidden-import=PyQt6.sip ^
+          --hidden-import=PyQt6.QtCore ^
+          --hidden-import=PyQt6.QtGui ^
+          --hidden-import=PyQt6.QtWidgets ^
+          retirement_app.py
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
@@ -41,7 +47,5 @@ jobs:
         tag_name: v${{ github.run_number }}
         name: 退休进度条 v${{ github.run_number }}
         files: dist/*.exe
-        draft: false
-        prerelease: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
