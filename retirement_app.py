@@ -205,7 +205,7 @@ def show_settings(config, icon=None):
         try:
             config['target_amount'] = float(target_entry.get())
             config['current_amount'] = float(current_entry.get())
-n            config['monthly_saving'] = float(monthly_entry.get())
+            config['monthly_saving'] = float(monthly_entry.get())
             config['annual_return'] = float(return_entry.get())
             save_config(config)
             if icon:
